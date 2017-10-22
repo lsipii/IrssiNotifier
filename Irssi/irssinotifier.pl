@@ -172,6 +172,15 @@ sub should_send_notification {
         }
     }
 
+    # If specified, require a pattern to be matched before highlighting private messages
+    my $required_private_highlight_pattern_string = Irssi::settings_get_str("irssinotifier_required_private_highlight_patterns");
+    if ($required_private_highlight_pattern_string ne '' && ($dest->{level} & MSGLEVEL_MSGS)) {
+        my @required_patterns = split(/ /, $required_private_highlight_pattern_string);
+        if (!(grep { $lastMsg =~ /$_/i } @required_patterns)) {
+            return 0; # Required pattern not matched
+        }
+    }
+
     my $timeout = Irssi::settings_get_int('irssinotifier_require_idle_seconds');
     if ($timeout > 0 && (time - $lastKeyboardActivity) <= $timeout && attached()) {
         return 0; # not enough idle seconds
@@ -480,6 +489,7 @@ Irssi::settings_add_str('irssinotifier', 'irssinotifier_ignored_channels', '');
 Irssi::settings_add_str('irssinotifier', 'irssinotifier_ignored_nicks', '');
 Irssi::settings_add_str('irssinotifier', 'irssinotifier_ignored_highlight_patterns', '');
 Irssi::settings_add_str('irssinotifier', 'irssinotifier_required_public_highlight_patterns', '');
+Irssi::settings_add_str('irssinotifier', 'irssinotifier_required_private_highlight_patterns', '');
 Irssi::settings_add_bool('irssinotifier', 'irssinotifier_ignore_active_window', 0);
 Irssi::settings_add_bool('irssinotifier', 'irssinotifier_away_only', 0);
 Irssi::settings_add_bool('irssinotifier', 'irssinotifier_screen_detached_only', 0);
